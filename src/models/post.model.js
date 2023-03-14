@@ -9,9 +9,9 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    photos: [{
-        ref: "Photo",
+    uploadFiles: [{
         type: mongoose.Schema.Types.ObjectId,
+        ref: "UploadFile"
     }]
 })
 
