@@ -13,10 +13,10 @@ const storage = multer.diskStorage({
 })
 const upload = multer({ storage: storage });
 
-router.post('/', upload.array('photos', 8), PostController.createPost);
+router.post('/', upload.array('files', 8), PostController.createPost);
 router.get('/', PostController.getPosts);
 router.get('/:id', PostController.getPost);
-router.put('/:id', upload.array('photos', 8), PostController.updatePost);
+router.put('/:id', upload.array('files', 8), PostController.updatePost);
 router.delete('/:id', PostController.deletePost);
 
 module.exports = router;

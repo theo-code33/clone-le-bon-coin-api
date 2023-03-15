@@ -9,6 +9,10 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    address: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Address"
+    },
     uploadFiles: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "UploadFile"
