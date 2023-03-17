@@ -10,7 +10,6 @@ const s3 = new S3({
 
 const uploadFile = (file, postId) => {
     const fileStream = fs.createReadStream(file.path);
-    console.log("file : ", file);
     const params = {
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: `${postId}/${file.originalname}`,

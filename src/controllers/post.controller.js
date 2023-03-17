@@ -5,10 +5,21 @@ const AwsS3_service = require("../utils/aws-s3");
 
 const PostController = {
     async createPost(req, res) {
-        console.log("body => ", req.body)
-        const { title, content, number_address, route, postal_code, city, country, administrative_area_level_1, administrative_area_level_2, lat, lng, address } = req.body;
+        const {
+            title,
+            content,
+            number_address,
+            route,
+            postal_code,
+            city,
+            country,
+            administrative_area_level_1,
+            administrative_area_level_2,
+            lat,
+            lng,
+            address
+        } = req.body;
         const { files } = req;
-        console.log(files)
         
         try {
             const post = new Post({
@@ -44,10 +55,29 @@ const PostController = {
         }
     },
     async getPosts(req, res) {
+        const { lng, lat } = req.query;
         try {
-            const posts = await Post.find().populate("uploadFiles").populate("address");
-            if(!posts) return res.status(404).send("No Posts founds")
-            res.send(posts);
+            if(lng && lat){
+                const postList = await Post.find().populate("uploadFiles").populate({
+                    path: 'address',
+                    match: {
+                        lat: {
+                            $gt: Number(lat) - 0.1,
+                            $lt: Number(lat) + 0.1
+                        },
+                        lng: {
+                            $gt: Number(lng) - 0.1,
+                            $lt: Number(lng) + 0.1
+                        }
+                    }
+                });
+                const postFiltered = postList.filter((post) => post.address !== null)
+                res.send(postFiltered);
+            }else{
+                const postList = await Post.find().populate("uploadFiles").populate("address");
+                if(!postList) return res.status(404).send("No Posts founds")
+                res.send(postList);
+            }
         } catch (error) {
             throw new Error(error);
         }
@@ -63,12 +93,40 @@ const PostController = {
         }
     },
     async updatePost(req, res) {
+        console.log("req.body => ", req.body)
         const { id } = req.params;
-        const { body } = req;
+        const { 
+            title,
+            content,
+            number_address,
+            route,
+            postal_code,
+            city,
+            country,
+            administrative_area_level_1,
+            administrative_area_level_2,
+            lat,
+            lng,
+            address
+        } = req.body;
 
+        const addressComponents = {
+            number_address: number_address,
+            route: route,
+            postal_code: postal_code,
+            city: city,
+            country: country,
+            administrative_area_level_1: administrative_area_level_1,
+            administrative_area_level_2: administrative_area_level_2,
+            address: address,
+            lat: lat,
+            lng: lng,
+        }
         try {
-            const post = await Post.findByIdAndUpdate(id, body)
+            const post = await Post.findByIdAndUpdate(id, {title, content})
             if(!post) return res.status(404).send("Post not found")
+            const address = await Address.findByIdAndUpdate(post.address._id, addressComponents)
+            if(!address) return res.status(404).send("Address not found")
             res.send(post);
         } catch (error) {
             throw new Error(error);
@@ -78,9 +136,13 @@ const PostController = {
     async deletePost(req, res) {
         const { id } = req.params;
         try {
-            const post = Post.findByIdAndDelete(id);
+            const post = await Post.findByIdAndDelete(id);
             if(!post) return res.status(404).send("Post not found")
-            res.send(post);
+            const address = await Address.findOneAndDelete({post: id});
+            if(!address) return res.status(404).send("Address not found")
+            const uploadFiles = await UploadFile.deleteMany({post: id});
+            if(!uploadFiles) return res.status(404).send("UploadFiles not found")
+            res.send({message: "Post deleted successfully"});
         } catch (error) {
             throw new Error(error);
         }
