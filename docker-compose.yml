@@ -1,9 +1,25 @@
 services:
-  mongo:
+  server:
+    build: .
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+    links:
+      - mongodb
+  mongodb:
     image: mongo
+    container_name: mongo
+    restart: always
     ports:
       - "27017:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
       - MONGO_INITDB_ROOT_DATABASE=${MONGO_INITDB_ROOT_DATABASE}
+    volumes:
+      - ./data:/data/db
+volumes:
+  mongo_data:
+    driver: local
