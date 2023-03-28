@@ -1,9 +1,7 @@
 services:
   server:
     container_name: nodejs_server
-    build: 
-      context: ./nodedocker_app
-      dockerfile: nodejs.dockerfile
+    build: .
     restart: on-failure
     ports:
       - "8080:8080"
@@ -11,20 +9,16 @@ services:
       - mongodb
     links:
       - mongodb
-    networks:
-      - api
   nginx:
-    build: 
-      context: ./nginx
-      dockerfile: nginx.dockerfile
+    image: nginx
     container_name: nginx
     hostname: nginx
     ports:
       - "80:80"
     depends_on:
       - server
-    networks:
-      - api
+    links:
+      - server
   mongodb:
     image: mongo
     container_name: mongo
@@ -37,12 +31,6 @@ services:
       - MONGO_INITDB_ROOT_DATABASE=${MONGO_INITDB_ROOT_DATABASE}
     volumes:
       - ./data:/data/db
-    networks:
-      - api
 volumes:
   mongo_data:
     driver: local
-
-networks:
-  api:
-    external: true
