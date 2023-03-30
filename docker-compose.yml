@@ -30,7 +30,8 @@ services:
     volumes:
       - ./api:/var/www/api
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./ssl:/etc/nginx/ssl
+      - ./ssl/theogillet.com_ssl_certificate.cer:/etc/nginx/ssl/theogillet.com_ssl_certificate.cer
+      - ./ssl/theogillet.com_ssl_certificate.cer:/etc/nginx/ssl/_.theogillet.com_private_key.key
     networks:
       - server
   mongodb:
