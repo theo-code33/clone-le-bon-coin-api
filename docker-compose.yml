@@ -22,7 +22,7 @@ services:
     container_name: nginx
     hostname: nginx
     ports:
-      - "80:80"
+      - "81:80"
     depends_on:
       - server
     links:
